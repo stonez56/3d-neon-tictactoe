@@ -1,0 +1,612 @@
+/* ==========================================================================
+   3D 霓虹井字棋 - 核心樣式檔 (CSS)
+   設計風格：深色霓虹、玻璃擬態 (Glassmorphism)、3D 立體互動與微動畫
+   ========================================================================== */
+
+/* 全域變數定義 */
+:root {
+    --bg-color: #0a0b10;
+    --card-bg: rgba(20, 22, 35, 0.45);
+    --card-border: rgba(255, 255, 255, 0.08);
+    --text-primary: #ffffff;
+    --text-muted: #8b949e;
+    
+    /* 霓虹配色 (使用 HSL 便於控制亮度和透明度) */
+    --neon-x: #00f3ff;
+    --neon-x-glow: rgba(0, 243, 255, 0.6);
+    --neon-o: #ff007f;
+    --neon-o-glow: rgba(255, 0, 127, 0.6);
+    --neon-accent: #9d4edd;
+    --neon-accent-glow: rgba(157, 78, 221, 0.5);
+    
+    /* 3D 旋轉變數 (由 JS 動態更新) */
+    --rotate-x: 0deg;
+    --rotate-y: 0deg;
+    
+    /* 字型 */
+    --font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* 重設樣式 */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: var(--font-family);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* 背景 Canvas */
+#particle-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    pointer-events: none;
+}
+
+/* 網頁主容器 */
+.app-container {
+    width: 100%;
+    max-width: 500px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    z-index: 1;
+}
+
+/* 玻璃磨砂卡片基底 */
+.card {
+    background: var(--card-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* ==========================================================================
+   頂部欄與標題 (Header)
+   ========================================================================== */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 5px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.brand h1 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.logo-icon {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--neon-x);
+    text-shadow: 0 0 10px var(--neon-x-glow);
+}
+
+.logo-o {
+    color: var(--neon-o);
+    text-shadow: 0 0 10px var(--neon-o-glow);
+    font-size: 1.2rem;
+    margin-left: -4px;
+}
+
+.top-controls {
+    display: flex;
+    gap: 10px;
+}
+
+/* 控制按鈕 (靜音、語系) */
+.control-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    padding: 8px 12px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-family: var(--font-family);
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.control-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.control-btn:active {
+    transform: translateY(0);
+}
+
+/* ==========================================================================
+   設定面板 (遊戲模式與難度)
+   ========================================================================== */
+.setup-section {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.control-group h2 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-muted);
+}
+
+/* 分段選擇器 (Segmented Control) */
+.segmented-control {
+    display: flex;
+    background: rgba(0, 0, 0, 0.25);
+    padding: 4px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.segment-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.segment-btn.active {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+#mode-selector .segment-btn.active {
+    background: linear-gradient(135deg, rgba(157, 78, 221, 0.25), rgba(123, 44, 191, 0.25));
+    border: 1px solid rgba(157, 78, 221, 0.4);
+    color: #e2c5ff;
+    text-shadow: 0 0 8px rgba(157, 78, 221, 0.6);
+}
+
+/* 隱藏難度選擇器 */
+#difficulty-group {
+    transition: all 0.3s ease;
+    max-height: 80px;
+    opacity: 1;
+    overflow: hidden;
+}
+
+#difficulty-group.hidden {
+    max-height: 0;
+    opacity: 0;
+    margin: 0;
+    padding: 0;
+    pointer-events: none;
+}
+
+/* ==========================================================================
+   資訊區（得分板與狀態橫幅）
+   ========================================================================== */
+.info-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* 得分板 */
+.scoreboard {
+    display: grid;
+    grid-template-columns: 1fr 0.8fr 1fr;
+    padding: 12px;
+    text-align: center;
+    gap: 8px;
+}
+
+.score-card {
+    padding: 8px 4px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.score-card.active {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.score-card.player-x.active {
+    border-color: rgba(0, 243, 255, 0.25);
+    box-shadow: inset 0 0 12px rgba(0, 243, 255, 0.08);
+}
+
+.score-card.player-o.active {
+    border-color: rgba(255, 0, 127, 0.25);
+    box-shadow: inset 0 0 12px rgba(255, 0, 127, 0.08);
+}
+
+.score-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
+}
+
+.score-value {
+    font-size: 1.6rem;
+    font-weight: 800;
+}
+
+.player-x .score-value {
+    color: var(--neon-x);
+    text-shadow: 0 0 8px var(--neon-x-glow);
+}
+
+.player-o .score-value {
+    color: var(--neon-o);
+    text-shadow: 0 0 8px var(--neon-o-glow);
+}
+
+.draw .score-value {
+    color: #ffd166;
+    text-shadow: 0 0 8px rgba(255, 209, 102, 0.5);
+}
+
+/* 狀態橫幅 */
+.status-banner {
+    padding: 12px;
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    border-color: rgba(255, 255, 255, 0.04);
+}
+
+/* ==========================================================================
+   3D 遊戲盤面結構與動畫 (3D Board)
+   ========================================================================== */
+.board-scene {
+    perspective: 1000px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 0;
+}
+
+/* 傾斜容器 - 承載 3D 空間傾斜 */
+.board-tilt-container {
+    width: 320px;
+    height: 320px;
+    transform-style: preserve-3d;
+    transform: rotateX(var(--rotate-x)) rotateY(var(--rotate-y));
+    transition: transform 0.15s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* 遊戲網格本體 */
+.board-grid {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--card-border);
+    padding: 12px;
+    border-radius: 20px;
+    box-shadow: 
+        0 15px 35px rgba(0, 0, 0, 0.5),
+        inset 0 0 20px rgba(255, 255, 255, 0.02);
+    transform-style: preserve-3d;
+}
+
+/* 3D 網格格子 */
+.cell-btn {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    cursor: pointer;
+    position: relative;
+    outline: none;
+    transform-style: preserve-3d;
+    transition: 
+        background 0.3s ease, 
+        border 0.3s ease, 
+        transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+        box-shadow 0.3s ease;
+    /* 給格子一點 3D 立體浮雕感 */
+    box-shadow: 
+        0 4px 6px rgba(0, 0, 0, 0.3),
+        inset 0 2px 2px rgba(255, 255, 255, 0.05);
+}
+
+.cell-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+    /* 懸停時往外浮起，並產生向內的景深 */
+    transform: translateZ(12px);
+    box-shadow: 
+        0 10px 20px rgba(0, 0, 0, 0.4),
+        0 0 15px rgba(255, 255, 255, 0.08);
+}
+
+.cell-btn:active {
+    transform: translateZ(4px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* 已落子格子不允許懸浮 */
+.cell-btn.occupied {
+    cursor: default;
+}
+
+.cell-btn.occupied:hover {
+    transform: translateZ(0px);
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* ==========================================================================
+   3D 棋子特效 (X & O)
+   ========================================================================== */
+
+/* 棋子容器 */
+.cell-btn .piece {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    transform-style: preserve-3d;
+    transform: translateZ(20px); /* 棋子懸浮在格子之上 */
+    animation: piece-bounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* 棋子彈跳落入動畫 */
+@keyframes piece-bounce {
+    0% {
+        transform: translateZ(100px) scale(0.3);
+        opacity: 0;
+    }
+    100% {
+        transform: translateZ(20px) scale(1);
+        opacity: 1;
+    }
+}
+
+/* 3D X 棋子 */
+.piece.x::before,
+.piece.x::after {
+    content: '';
+    position: absolute;
+    width: 8%;
+    height: 60%;
+    background-color: var(--neon-x);
+    border-radius: 4px;
+    box-shadow: 
+        0 0 10px var(--neon-x-glow),
+        0 0 20px var(--neon-x-glow),
+        inset 0 0 5px rgba(255, 255, 255, 0.8);
+    transform-style: preserve-3d;
+}
+
+.piece.x::before {
+    transform: rotate(45deg);
+}
+
+.piece.x::after {
+    transform: rotate(-45deg);
+}
+
+/* 3D O 棋子 */
+.piece.o {
+    width: 48%;
+    height: 48%;
+    border: 6px solid var(--neon-o);
+    border-radius: 50%;
+    box-shadow: 
+        0 0 10px var(--neon-o-glow),
+        0 0 20px var(--neon-o-glow),
+        inset 0 0 10px var(--neon-o-glow),
+        inset 0 0 5px rgba(255, 255, 255, 0.8);
+    background: transparent;
+    /* override piece alignment positioning */
+    position: relative;
+    top: auto;
+    left: auto;
+}
+
+/* 贏球連線格子高亮閃爍 */
+.cell-btn.winning-cell {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.3);
+    animation: pulse-winning 1.2s ease-in-out infinite alternate;
+}
+
+.cell-btn.winning-cell.x-win {
+    border-color: var(--neon-x);
+    box-shadow: 
+        0 0 20px rgba(0, 243, 255, 0.3),
+        inset 0 0 15px rgba(0, 243, 255, 0.2);
+}
+
+.cell-btn.winning-cell.o-win {
+    border-color: var(--neon-o);
+    box-shadow: 
+        0 0 20px rgba(255, 0, 127, 0.3),
+        inset 0 0 15px rgba(255, 0, 127, 0.2);
+}
+
+@keyframes pulse-winning {
+    0% {
+        transform: translateZ(5px) scale(0.98);
+    }
+    100% {
+        transform: translateZ(15px) scale(1.02);
+    }
+}
+
+/* 重設時的 3D 翻轉動畫 */
+.board-grid.reset-animation {
+    animation: board-flip 0.7s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+
+@keyframes board-flip {
+    0% {
+        transform: rotateY(0deg);
+    }
+    100% {
+        transform: rotateY(360deg);
+    }
+}
+
+/* ==========================================================================
+   控制按鈕與底部 (Controls & Footer)
+   ========================================================================== */
+.actions-section {
+    display: flex;
+    gap: 15px;
+}
+
+.action-btn {
+    flex: 1;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font-family);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* 重新開始按鈕 (主要) */
+.primary-btn {
+    background: linear-gradient(135deg, var(--neon-accent) 0%, #7b2cbf 100%);
+    color: var(--text-primary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+        0 4px 15px rgba(157, 78, 221, 0.3),
+        inset 0 1px 1px rgba(255, 255, 255, 0.2);
+}
+
+.primary-btn:hover {
+    background: linear-gradient(135deg, #ae63e4 0%, #8a3cd8 100%);
+    box-shadow: 
+        0 6px 20px rgba(157, 78, 221, 0.5),
+        inset 0 1px 1px rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.primary-btn:active {
+    transform: translateY(0);
+}
+
+/* 重設分數按鈕 (次要) */
+.secondary-btn {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-muted);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.secondary-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+    border-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.secondary-btn:active {
+    transform: translateY(0);
+}
+
+/* 頁尾 */
+footer {
+    text-align: center;
+    padding: 10px 0;
+}
+
+footer p {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.2);
+    letter-spacing: 0.5px;
+}
+
+/* ==========================================================================
+   響應式設計 (Responsive Design)
+   ========================================================================== */
+@media (max-width: 400px) {
+    .app-container {
+        padding: 12px;
+        gap: 12px;
+    }
+    
+    .board-tilt-container {
+        width: 280px;
+        height: 280px;
+    }
+    
+    .brand h1 {
+        font-size: 1.25rem;
+    }
+    
+    .score-value {
+        font-size: 1.3rem;
+    }
+    
+    .action-btn {
+        padding: 12px;
+        font-size: 0.85rem;
+    }
+}

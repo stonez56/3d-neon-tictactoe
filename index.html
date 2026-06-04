@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D 霓虹井字棋 | 3D Neon Tic-Tac-Toe</title>
+    <!-- 載入 Google 字型 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome 載入靜音與語系圖示 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Canvas 粒子背景 -->
+    <canvas id="particle-canvas"></canvas>
+
+    <div class="app-container">
+        <!-- 頂部控制列 -->
+        <header>
+            <div class="brand">
+                <span class="logo-icon">✕</span>
+                <span class="logo-icon logo-o">◯</span>
+                <h1 data-i18n="app-title">3D 霓虹井字棋</h1>
+            </div>
+            <div class="top-controls">
+                <!-- 語系切換按鈕 -->
+                <button id="lang-toggle" class="control-btn" aria-label="切換語言 / Switch Language">
+                    <i class="fa-solid fa-language"></i>
+                    <span id="lang-text">English</span>
+                </button>
+                <!-- 音效靜音按鈕 -->
+                <button id="mute-toggle" class="control-btn" aria-label="切換音效 / Toggle Mute">
+                    <i class="fa-solid fa-volume-high"></i>
+                </button>
+            </div>
+        </header>
+
+        <main>
+            <!-- 遊戲模式與難度選擇區 -->
+            <section class="setup-section card">
+                <div class="control-group">
+                    <h2 data-i18n="game-mode-label">遊戲模式</h2>
+                    <div class="segmented-control" id="mode-selector">
+                        <button class="segment-btn active" data-mode="ai" data-i18n="mode-pve">單人對戰 (AI)</button>
+                        <button class="segment-btn" data-mode="pvp" data-i18n="mode-pvp">雙人對戰</button>
+                    </div>
+                </div>
+
+                <div class="control-group" id="difficulty-group">
+                    <h2 data-i18n="difficulty-label">AI 難度</h2>
+                    <div class="segmented-control" id="difficulty-selector">
+                        <button class="segment-btn" data-diff="easy" data-i18n="diff-easy">簡單</button>
+                        <button class="segment-btn active" data-diff="medium" data-i18n="diff-medium">中等</button>
+                        <button class="segment-btn" data-diff="hard" data-i18n="diff-hard">困難</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 資訊狀態面板 -->
+            <section class="info-section">
+                <!-- 得分板 -->
+                <div class="scoreboard card">
+                    <div class="score-card player-x active" id="score-card-x">
+                        <div class="score-label" id="label-player-x" data-i18n="score-p1">玩家 X</div>
+                        <div class="score-value" id="score-x">0</div>
+                    </div>
+                    <div class="score-card draw">
+                        <div class="score-label" data-i18n="score-draw">平手</div>
+                        <div class="score-value" id="score-draw">0</div>
+                    </div>
+                    <div class="score-card player-o" id="score-card-o">
+                        <div class="score-label" id="label-player-o" data-i18n="score-p2-ai">電腦 O</div>
+                        <div class="score-value" id="score-o">0</div>
+                    </div>
+                </div>
+
+                <!-- 目前狀態提示 -->
+                <div class="status-banner card">
+                    <span id="status-text" data-i18n="status-start">點擊格子開始遊戲！</span>
+                </div>
+            </section>
+
+            <!-- 3D 遊戲盤面空間 -->
+            <section class="board-scene" id="board-scene">
+                <div class="board-tilt-container" id="board-tilt">
+                    <div class="board-grid" id="board-grid">
+                        <button class="cell-btn" data-index="0" aria-label="網格 0"></button>
+                        <button class="cell-btn" data-index="1" aria-label="網格 1"></button>
+                        <button class="cell-btn" data-index="2" aria-label="網格 2"></button>
+                        <button class="cell-btn" data-index="3" aria-label="網格 3"></button>
+                        <button class="cell-btn" data-index="4" aria-label="網格 4"></button>
+                        <button class="cell-btn" data-index="5" aria-label="網格 5"></button>
+                        <button class="cell-btn" data-index="6" aria-label="網格 6"></button>
+                        <button class="cell-btn" data-index="7" aria-label="網格 7"></button>
+                        <button class="cell-btn" data-index="8" aria-label="網格 8"></button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 遊戲控制按鈕 -->
+            <section class="actions-section">
+                <button id="restart-btn" class="action-btn primary-btn">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span data-i18n="btn-restart">重新開始</span>
+                </button>
+                <button id="reset-scores-btn" class="action-btn secondary-btn">
+                    <i class="fa-solid fa-trash-can"></i>
+                    <span data-i18n="btn-reset-scores">重設分數</span>
+                </button>
+            </section>
+        </main>
+
+        <footer>
+            <p data-i18n="footer-text">3D 霓虹井字棋 &copy; 2026. 結合 CSS 3D 轉換與 Web Audio API.</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
