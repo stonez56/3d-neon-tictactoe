@@ -59,7 +59,7 @@ This project is a **pure static web application**. No installation, compilation,
 * `index.html` - 網頁 HTML 結構骨架與語系標記。 (HTML structure and translation attributes).
 * `style.css` - 3D 空間透視、發光霓虹主題、玻璃擬態樣式。 (CSS 3D perspective and neon glassmorphism styling).
 * `app.js` - 遊戲狀態管理、3D 傾斜監聽、語系切換、音效合成與 Minimax 演算法。 (Core controller logic: UI translations, mouse tracking tilt, canvas particles, audio synths, and AI).
-* `Q&A.md` - 專案相關技術問答集（適合引用於簡報或教學）。 (Q&A collection detailing Antigravity 2.0 design architectures).
+* `QA.md` - 專案相關技術問答集（適合引用於簡報或教學）。 (QA collection detailing Antigravity 2.0 design architectures).
 
 ---
 
